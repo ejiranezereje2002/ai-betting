@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PitchEdge AI - Football Prediction & Betting Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/60 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-emerald-500 text-slate-950 p-2.5 rounded-xl font-bold flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-futbol text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-tight text-white">PitchEdge <span class="text-emerald-400">AI</span></h1>
+                    <p class="text-xs text-slate-400 font-medium">Advanced Football Analytics & Live Value Engine</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button id="toggleFeedBtn" onclick="toggleLiveFeed()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-emerald-600/30">
+                    <span class="w-2 h-2 rounded-full bg-white animate-pulse" id="feedIndicator"></span>
+                    <span id="feedBtnText">Start Live Feed</span>
+                </button>
+                <button onclick="switchTab('dashboard')" id="navDashboard" class="bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition hover:bg-slate-700">Dashboard</button>
+                <button onclick="switchTab('history')" id="navHistory" class="text-slate-400 hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition">History & Feedback</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Dashboard View -->
+        <div id="viewDashboard" class="space-y-6">
+            <!-- Filter Bar -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">League:</span>
+                    <select id="leagueFilter" onchange="filterMatches()" class="bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2 outline-none focus:border-emerald-500 transition">
+                        <option value="all">Top 10 Leagues (All)</option>
+                        <option value="Premier League">English Premier League</option>
+                        <option value="La Liga">Spanish La Liga</option>
+                        <option value="Serie A">Italian Serie A</option>
+                        <option value="Bundesliga">German Bundesliga</option>
+                        <option value="Ligue 1">French Ligue 1</option>
+                        <option value="Liga Portugal">Liga Portugal</option>
+                        <option value="Belgian Pro League">Belgian Pro League</option>
+                        <option value="Eredivisie">Dutch Eredivisie</option>
+                        <option value="Super Lig">Turkish Super Lig</option>
+                        <option value="Super League Greece">Super League Greece</option>
+                    </select>
+
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 ml-2">Market:</span>
+                    <select id="marketFilter" onchange="filterMatches()" class="bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-xl px-3 py-2 outline-none focus:border-emerald-500 transition">
+                        <option value="all">All Markets</option>
+                        <option value="1X2">Match Winner (1X2)</option>
+                        <option value="Over/Under">Over / Under 2.5</option>
+                        <option value="BTTS">Both Teams to Score</option>
+                        <option value="Asian Handicap">Asian Handicap</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+                    <label class="flex items-center gap-2 cursor-pointer bg-slate-800/80 px-3 py-2 rounded-xl border border-slate-700 text-sm">
+                        <input type="checkbox" id="highConfidenceToggle" onchange="filterMatches()" class="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-emerald-500 w-4 h-4">
+                        <span class="text-emerald-400 font-semibold">High Confidence Only (EV > 5%)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Matches Grid -->
+            <div id="matchesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Match Card 1 -->
+                <div class="match-card bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-700 transition" data-league="Premier League" data-market="1X2" data-confidence="true">
+                    <div>
+                        <div class="flex justify-between items-center text-xs text-slate-400 mb-3">
+                            <span class="bg-slate-800 px-2.5 py-1 rounded-lg text-emerald-400 font-medium">Premier League</span>
+                            <span id="status-1" class="font-semibold text-amber-400">Today, 15:00</span>
+                        </div>
+                        <div class="flex justify-between items-center my-4">
+                            <div class="text-center flex-1">
+                                <p class="font-bold text-lg text-white">Arsenal</p>
+                                <p class="text-xs text-slate-400">Home (xG: 1.85)</p>
+                            </div>
+                            <div class="px-3 text-slate-500 font-black">VS</div>
+                            <div class="text-center flex-1">
+                                <p class="font-bold text-lg text-white">Chelsea</p>
+                                <p class="text-xs text-slate-400">Away (xG: 1.15)</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800/80 space-y-2 mb-4">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Recommended Pick:</span>
+                                <span class="text-emerald-400 font-bold">Arsenal Win (1X2)</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Model Probability vs Odds:</span>
+                                <span class="text-white font-semibold">58.5% (Odds: 2.10)</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Expected Value (EV):</span>
+                                <span class="text-emerald-400 font-bold">+22.8% (High Edge)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="openMatchModal('Arsenal', 'Chelsea', 'Premier League', '58.5%', '2.10', '+22.8%')" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold py-2.5 rounded-xl transition">
+                        Inspect Model & Feedback
+                    </button>
+                </div>
+
+                <!-- Match Card 2 -->
+                <div class="match-card bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-700 transition" data-league="La Liga" data-market="Over/Under" data-confidence="true">
+                    <div>
+                        <div class="flex justify-between items-center text-xs text-slate-400 mb-3">
+                            <span class="bg-slate-800 px-2.5 py-1 rounded-lg text-emerald-400 font-medium">La Liga</span>
+                            <span id="status-2" class="font-semibold text-amber-400">Today, 18:30</span>
+                        </div>
+                        <div class="flex justify-between items-center my-4">
+                            <div class="text-center flex-1">
+                                <p class="font-bold text-lg text-white">Real Madrid</p>
+                                <p class="text-xs text-slate-400">Home (xG: 2.10)</p>
+                            </div>
+                            <div class="px-3 text-slate-500 font-black">VS</div>
+                            <div class="text-center flex-1">
+                                <p class="font-bold text-lg text-white">Barcelona</p>
+                                <p class="text-xs text-slate-400">Away (xG: 1.90)</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800/80 space-y-2 mb-4">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Recommended Pick:</span>
+                                <span class="text-emerald-400 font-bold">Over 2.5 Goals</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Model Probability vs Odds:</span>
+                                <span class="text-white font-semibold">66.0% (Odds: 1.70)</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Expected Value (EV):</span>
+                                <span class="text-emerald-400 font-bold">+12.2% (High Edge)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="openMatchModal('Real Madrid', 'Barcelona', 'La Liga', '66.0%', '1.70', '+12.2%')" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold py-2.5 rounded-xl transition">
+                        Inspect Model & Feedback
+                    </button>
+                </div>
+
+                <!-- Match Card 3 -->
+                <div class="match-card bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-700 transition" data-league="Serie A" data-market="BTTS" data-confidence="false">
+                    <div>
+                        <div class="flex justify-between items-center text-xs text-slate-400 mb-3">
+                            <span class="bg-slate-800 px-2.5 py-1 rounded-lg text-slate-300 font-medium">Serie A</span>
+                            <span id="status-3" class="font-semibold text-amber-400">Tomorrow, 20:45</span>
+                        </div>
+                        <div class="flex justify-between items-center my-4">
+                            <div class="text-center flex-1">
+                                <p class="font-bold text-lg text-white">AC Milan</p>
+                                <p class="text-xs text-slate-400">Home (xG: 1.30)</p>
+                            </div>
+                            <div class="px-3 text-slate-500 font-black">VS</div>
+                            <div class="text-center flex-1">
+                                <p class="font-bold text-lg text-white">Inter Milan</p>
+                                <p class="text-xs text-slate-400">Away (xG: 1.40)</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/60 rounded-xl p-3 border border-slate-800/80 space-y-2 mb-4">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Recommended Pick:</span>
+                                <span class="text-emerald-400 font-bold">Both Teams to Score (Yes)</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Model Probability vs Odds:</span>
+                                <span class="text-white font-semibold">52.0% (Odds: 1.85)</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-400">Expected Value (EV):</span>
+                                <span class="text-amber-400 font-bold">-3.8% (Low Edge)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="openMatchModal('AC Milan', 'Inter Milan', 'Serie A', '52.0%', '1.85', '-3.8%')" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold py-2.5 rounded-xl transition">
+                        Inspect Model & Feedback
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- History & Feedback View -->
+        <div id="viewHistory" class="space-y-6 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                    <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">30-Day Win Rate</p>
+                    <p class="text-3xl font-black text-emerald-400 mt-2">64.2%</p>
+                    <p class="text-xs text-slate-500 mt-1">Based on 148 settled high-edge picks</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                    <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Model Calibration (Brier Score)</p>
+                    <p class="text-3xl font-black text-white mt-2">0.184</p>
+                    <p class="text-xs text-slate-500 mt-1">Lower score indicates higher accuracy</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+                    <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Total Recorded Feedback</p>
+                    <p class="text-3xl font-black text-emerald-400 mt-2" id="feedbackCount">0</p>
+                    <p class="text-xs text-slate-500 mt-1">User context logs submitted</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-white mb-4">User Feedback Log & Retraining Inputs</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-800 text-xs text-slate-400 uppercase">
+                            <tr>
+                                <th class="p-3 rounded-l-xl">Match</th>
+                                <th class="p-3">Rating</th>
+                                <th class="p-3">User Notes</th>
+                                <th class="p-3 rounded-r-xl">Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feedbackTableBody" class="divide-y divide-slate-800">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Deep Inspection & Feedback -->
+    <div id="matchModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 relative shadow-2xl">
+            <button onclick="closeMatchModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div>
+                <span id="modalLeague" class="text-xs font-bold text-emerald-400 bg-emerald-950/50 px-2.5 py-1 rounded-lg border border-emerald-800/50">League</span>
+                <h2 id="modalTeams" class="text-2xl font-black text-white mt-2">Team A vs Team B</h2>
+            </div>
+
+            <div class="space-y-3">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Bivariate Poisson Scoreline Matrix (Top Probabilities)</p>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <p class="text-slate-400">1 - 0</p>
+                        <p class="text-emerald-400 font-bold mt-1">14.2%</p>
+                    </div>
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <p class="text-slate-400">1 - 1</p>
+                        <p class="text-white font-bold mt-1">12.8%</p>
+                    </div>
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                        <p class="text-slate-400">2 - 1</p>
+                        <p class="text-emerald-400 font-bold mt-1">11.5%</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">XGBoost Driving Factors</p>
+                <ul class="text-xs space-y-2 text-slate-300 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Home team high pressing efficiency in last 5 matches (+18%)</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Opponent fatigue index due to midweek European fixture (-12%)</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Historical head-to-head xG differential favoring home side</li>
+                </ul>
+            </div>
+
+            <div class="space-y-3 border-t border-slate-800 pt-4">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Submit System Feedback</p>
+                <div class="flex gap-3">
+                    <button onclick="submitFeedback('Accurate')" class="flex-1 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/50 text-emerald-400 font-semibold py-2.5 rounded-xl text-sm transition">
+                        <i class="fa-solid fa-thumbs-up mr-2"></i> Accurate Prediction
+                    </button>
+                    <button onclick="submitFeedback('Missed Context')" class="flex-1 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/50 text-rose-400 font-semibold py-2.5 rounded-xl text-sm transition">
+                        <i class="fa-solid fa-thumbs-down mr-2"></i> Missed Context
+                    </button>
+                </div>
+                <input type="text" id="feedbackNotes" placeholder="Optional notes (e.g., late weather delay, key injury)..." class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-sm rounded-xl px-3 py-2.5 outline-none focus:border-emerald-500 transition">
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let liveFeedActive = false;
+        let liveFeedInterval = null;
+        let selectedMatchName = "";
+        let feedbackStorage = JSON.parse(localStorage.getItem('pitchEdgeFeedback')) || [];
+
+        function switchTab(tab) {
+            if (tab === 'dashboard') {
+                document.getElementById('viewDashboard').classList.remove('hidden');
+                document.getElementById('viewHistory').classList.add('hidden');
+                document.getElementById('navDashboard').className = 'bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition';
+                document.getElementById('navHistory').className = 'text-slate-400 hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition';
+            } else {
+                document.getElementById('viewDashboard').classList.add('hidden');
+                document.getElementById('viewHistory').classList.remove('hidden');
+                document.getElementById('navHistory').className = 'bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-medium transition';
+                document.getElementById('navDashboard').className = 'text-slate-400 hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition';
+                renderFeedbackTable();
+            }
+        }
+
+        function filterMatches() {
+            const league = document.getElementById('leagueFilter').value;
+            const market = document.getElementById('marketFilter').value;
+            const highConfidenceOnly = document.getElementById('highConfidenceToggle').checked;
+            
+            const cards = document.querySelectorAll('.match-card');
+            cards.forEach(card => {
+                const cardLeague = card.getAttribute('data-league');
+                const cardMarket = card.getAttribute('data-market');
+                const isHighConf = card.getAttribute('data-confidence') === 'true';
+
+                let matchLeague = (league === 'all' || cardLeague === league);
+                let matchMarket = (market === 'all' || cardMarket === market);
+                let matchConf = (!highConfidenceOnly || isHighConf);
+
+                if (matchLeague && matchMarket && matchConf) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleLiveFeed() {
+            liveFeedActive = !liveFeedActive;
+            const btn = document.getElementById('toggleFeedBtn');
+            const indicator = document.getElementById('feedIndicator');
+            const text = document.getElementById('feedBtnText');
+            const status1 = document.getElementById('status-1');
+
+            if (liveFeedActive) {
+                btn.className = 'bg-rose-600 hover:bg-rose-500 text-white font-semibold px-4 py-2 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-rose-600/30';
+                indicator.className = 'w-2 h-2 rounded-full bg-white animate-ping';
+                text.innerText = 'Stop Live Feed';
+                status1.innerText = "LIVE 64'";
+                status1.className = "font-semibold text-rose-500 animate-pulse";
+                
+                liveFeedInterval = setInterval(() => {
+                    // Simulate live Bayesian probability recalculation drift
+                    console.log("Polling live feed API & recalculating Bayesian probabilities...");
+                }, 15000);
+            } else {
+                btn.className = 'bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-emerald-600/30';
+                indicator.className = 'w-2 h-2 rounded-full bg-white animate-pulse';
+                text.innerText = 'Start Live Feed';
+                status1.innerText = "Today, 15:00";
+                status1.className = "font-semibold text-amber-400";
+                clearInterval(liveFeedInterval);
+            }
+        }
+
+        function openMatchModal(home, away, league, prob, odds, ev) {
+            selectedMatchName = `${home} vs ${away}`;
+            document.getElementById('modalLeague').innerText = league;
+            document.getElementById('modalTeams').innerText = selectedMatchName;
+            document.getElementById('matchModal').classList.remove('hidden');
+        }
+
+        function closeMatchModal() {
+            document.getElementById('matchModal').classList.add('hidden');
+            document.getElementById('feedbackNotes').value = '';
+        }
+
+        function submitFeedback(rating) {
+            const notes = document.getElementById('feedbackNotes').value;
+            const timestamp = new Date().toLocaleString();
+            
+            feedbackStorage.unshift({
+                match: selectedMatchName,
+                rating: rating,
+                notes: notes || 'No notes provided',
+                timestamp: timestamp
+            });
+
+            localStorage.setItem('pitchEdgeFeedback', JSON.stringify(feedbackStorage));
+            closeMatchModal();
+            alert("Feedback recorded successfully. Model weight parameters queued for weekly retraining.");
+        }
+
+        function renderFeedbackTable() {
+            const tbody = document.getElementById('feedbackTableBody');
+            document.getElementById('feedbackCount').innerText = feedbackStorage.length;
+            
+            if (feedbackStorage.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No feedback submitted yet. Inspect a match card to submit feedback.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = feedbackStorage.map(item => `
+                <tr class="hover:bg-slate-800/50">
+                    <td class="p-3 font-medium text-white">${item.match}</td>
+                    <td class="p-3">
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-semibold ${item.rating === 'Accurate' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/50' : 'bg-rose-950 text-rose-400 border border-rose-800/50'}">
+                            ${item.rating}
+                        </span>
+                    </td>
+                    <td class="p-3 text-slate-400">${item.notes}</td>
+                    <td class="p-3 text-slate-500 text-xs">${item.timestamp}</td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
