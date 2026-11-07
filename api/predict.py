@@ -1,26 +1,39 @@
 import json
+import math
 from http.server import BaseHTTPRequestHandler
-from scipy.stats import poisson
-import numpy as np
+
+def poisson_pmf(k, lam):
+    return (lam**k) * math.exp(-lam) / math.factorial(k)
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             
             home_lambda = 1.85
             away_lambda = 1.15
             max_goals = 6
             
-            home_probs = [float(poisson.pmf(i, home_lambda)) for i in range(max_goals + 1)]
-            away_probs = [float(poisson.pmf(j, away_lambda)) for j in range(max_goals + 1)]
-            matrix = np.outer(home_probs, away_probs)
+            home_probs = [poisson_pmf(i, home_lambda) for i in range(max_goals + 1)]
+            away_probs = [poisson_pmf(j, away_lambda) for j in range(max_goals + 1)]
             
-            home_win = float(np.sum(np.tril(matrix, -1)))
-            draw = float(np.sum(np.diag(matrix)))
-            away_win = float(np.sum(np.triu(matrix, 1)))
+            home_win = 0.0
+            draw = 0.0
+            away_win = 0.0
+            
+            for h in range(max_goals + 1):
+                for a in range(max_goals + 1):
+                    prob = home_probs[h] * away_probs[a]
+                    if h > a:
+                        home_win += prob
+                    elif h == a:
+                        draw += prob
+                    else:
+                        away_win += prob
+                        
             total = home_win + draw + away_win
             
             response_data = {
@@ -37,6 +50,5 @@ class handler(BaseHTTPRequestHandler):
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            error_data = {"status": "error", "message": str(e)}
-            self.wfile.write(json.dumps(error_data).encode('utf-8'))
+            self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
         return
