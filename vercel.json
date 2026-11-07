@@ -1,8 +1,0 @@
-{
-  "version": 2,
-  "routes": [
-    { "src": "/api/fixtures", "dest": "/api/fixtures.py" },
-    { "src": "/api/predict", "dest": "/api/predict.py" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ]
-}
